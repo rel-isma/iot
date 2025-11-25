@@ -1,0 +1,100 @@
+# Deployment for App 2
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app2-deployment
+  labels:
+    app: app2
+spec:
+  replicas: 3  # THREE REPLICAS!
+  selector:
+    matchLabels:
+      app: app2
+  template:
+    metadata:
+      labels:
+        app: app2
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: html
+        configMap:
+          name: app2-html
+
+---
+# ConfigMap with HTML content
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app2-html
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>App 2</title>
+        <style>
+            body {
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                color: white;
+                font-family: Arial, sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+            }
+            .container {
+                text-align: center;
+                background: rgba(255,255,255,0.1);
+                padding: 50px;
+                border-radius: 20px;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            }
+            h1 { font-size: 3em; margin: 0; }
+            p { font-size: 1.5em; }
+            .badge {
+                background: rgba(255,255,255,0.3);
+                padding: 10px 20px;
+                border-radius: 25px;
+                display: inline-block;
+                margin-top: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>⚡ Application 2</h1>
+            <p>Host: app2.com</p>
+            <div class="badge">
+                <p style="margin: 0;">🔥 This app has 3 REPLICAS! 🔥</p>
+            </div>
+            <p style="font-size: 1em; margin-top: 20px;">
+                Load balanced across multiple pods
+            </p>
+        </div>
+    </body>
+    </html>
+
+---
+# Service for App 2
+apiVersion: v1
+kind: Service
+metadata:
+  name: app2-service
+spec:
+  selector:
+    app: app2
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80

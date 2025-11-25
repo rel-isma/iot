@@ -1,0 +1,45 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+  # ---
+  # 1. Define the "Server" Machine (Controller)
+  # ---
+  config.vm.define "rel-ismaS" do |server|
+    
+    server.vm.box = "ubuntu/focal64"
+    server.vm.hostname = "rel-ismaS"
+    server.vm.network "private_network", ip: "192.168.56.110"
+
+    # --- THIS LINE RUNS THE SERVER SCRIPT ---
+    server.vm.provision "shell", path: "scripts/server.sh"
+
+    server.vm.provider "virtualbox" do |vb|
+      vb.name = "rel-ismaS"
+      # Give the server 2GB of RAM to prevent crashing
+      vb.memory = "2048"
+      vb.cpus = 1
+    end
+  end
+
+  # ---
+  # 2. Define the "Server Worker" Machine (Agent)
+  # ---
+  config.vm.define "rel-ismaSW" do |worker|
+    
+    worker.vm.box = "ubuntu/focal64"
+    worker.vm.hostname = "rel-ismaSW"
+    worker.vm.network "private_network", ip: "192.168.56.111"
+
+    # --- THIS LINE RUNS THE WORKER SCRIPT ---
+    worker.vm.provision "shell", path: "scripts/worker.sh"
+
+    worker.vm.provider "virtualbox" do |vb|
+      vb.name = "rel-ismaSW"
+      vb.memory = "1024"
+      vb.cpus = 1
+    end
+  end
+
+end
